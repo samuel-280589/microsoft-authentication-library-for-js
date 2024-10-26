@@ -3,7 +3,6 @@
  * Licensed under the MIT License.
  */
 
-import sinon from "sinon";
 import {
     ResponseMode,
     AuthenticationScheme,
@@ -13,21 +12,22 @@ import {
     ProtocolMode,
     ServerResponseType,
 } from "@azure/msal-common";
-import { PublicClientApplication } from "../../src/app/PublicClientApplication";
-import { StandardInteractionClient } from "../../src/interaction_client/StandardInteractionClient";
-import { EndSessionRequest } from "../../src/request/EndSessionRequest";
+import { PublicClientApplication } from "../../src/app/PublicClientApplication.js";
+import { StandardInteractionClient } from "../../src/interaction_client/StandardInteractionClient.js";
+import { EndSessionRequest } from "../../src/request/EndSessionRequest.js";
 import {
     TEST_CONFIG,
     TEST_STATE_VALUES,
     TEST_URIS,
     DEFAULT_TENANT_DISCOVERY_RESPONSE,
     DEFAULT_OPENID_CONFIG_RESPONSE,
-} from "../utils/StringConstants";
-import { AuthorizationUrlRequest } from "../../src/request/AuthorizationUrlRequest";
-import { RedirectRequest } from "../../src/request/RedirectRequest";
-import * as PkceGenerator from "../../src/crypto/PkceGenerator";
-import { FetchClient } from "../../src/network/FetchClient";
-import { InteractionType } from "../../src/utils/BrowserConstants";
+    TEST_REQ_CNF_DATA,
+} from "../utils/StringConstants.js";
+import { AuthorizationUrlRequest } from "../../src/request/AuthorizationUrlRequest.js";
+import { RedirectRequest } from "../../src/request/RedirectRequest.js";
+import * as PkceGenerator from "../../src/crypto/PkceGenerator.js";
+import { FetchClient } from "../../src/network/FetchClient.js";
+import { InteractionType } from "../../src/utils/BrowserConstants.js";
 
 class testStandardInteractionClient extends StandardInteractionClient {
     acquireToken(): Promise<void> {
@@ -45,14 +45,11 @@ class testStandardInteractionClient extends StandardInteractionClient {
         return super.initializeAuthorizationRequest(request, interactionType);
     }
 
-    async getDiscoveredAuthority(
-        requestAuthority?: string,
-        requestAzureCloudOptions?: AzureCloudOptions
-    ) {
-        return super.getDiscoveredAuthority(
-            requestAuthority,
-            requestAzureCloudOptions
-        );
+    async getDiscoveredAuthority(params: {
+        requestAuthority?: string;
+        requestAzureCloudOptions?: AzureCloudOptions;
+    }) {
+        return super.getDiscoveredAuthority(params);
     }
 
     logout(request: EndSessionRequest): Promise<void> {
@@ -91,31 +88,32 @@ describe("StandardInteractionClient", () => {
             //@ts-ignore
             pca.performanceClient
         );
-        sinon
-            .stub(Authority.prototype, <any>"getEndpointMetadataFromNetwork")
-            .resolves(DEFAULT_OPENID_CONFIG_RESPONSE.body);
-        sinon
-            .stub(FetchClient.prototype, "sendGetRequestAsync")
-            .callsFake((url) => {
-                if (
-                    url.startsWith(
-                        "https://login.microsoftonline.com/common/discovery/instance?"
-                    )
-                ) {
-                    return Promise.resolve(DEFAULT_TENANT_DISCOVERY_RESPONSE);
-                } else {
-                    return Promise.reject({
-                        headers: {},
-                        status: 404,
-                        body: {},
-                    });
-                }
-            });
+        jest.spyOn(
+            Authority.prototype,
+            <any>"getEndpointMetadataFromNetwork"
+        ).mockResolvedValue(DEFAULT_OPENID_CONFIG_RESPONSE.body);
+        jest.spyOn(
+            FetchClient.prototype,
+            "sendGetRequestAsync"
+        ).mockImplementation((url) => {
+            if (
+                url.startsWith(
+                    "https://login.microsoftonline.com/common/discovery/instance?"
+                )
+            ) {
+                return Promise.resolve(DEFAULT_TENANT_DISCOVERY_RESPONSE);
+            } else {
+                return Promise.reject({
+                    headers: {},
+                    status: 404,
+                    body: {},
+                });
+            }
+        });
     });
 
     afterEach(() => {
         jest.restoreAllMocks();
-        sinon.restore();
     });
 
     it("initializeAuthorizationCodeRequest", async () => {
@@ -141,26 +139,78 @@ describe("StandardInteractionClient", () => {
             await testClient.initializeAuthorizationCodeRequest(request);
         expect(request.codeChallenge).toBe(TEST_CONFIG.TEST_CHALLENGE);
         expect(authCodeRequest.codeVerifier).toBe(TEST_CONFIG.TEST_VERIFIER);
+        expect(authCodeRequest.popKid).toBeUndefined;
+    });
+
+    it("initializeAuthorizationCodeRequest validates the request and does not influence undefined popKid param", async () => {
+        const request: AuthorizationUrlRequest = {
+            redirectUri: TEST_URIS.TEST_REDIR_URI,
+            scopes: ["scope"],
+            loginHint: "AbeLi@microsoft.com",
+            state: TEST_STATE_VALUES.USER_STATE,
+            authority: TEST_CONFIG.validAuthority,
+            correlationId: TEST_CONFIG.CORRELATION_ID,
+            responseMode: TEST_CONFIG.RESPONSE_MODE as ResponseMode,
+            nonce: "",
+            authenticationScheme:
+                TEST_CONFIG.TOKEN_TYPE_BEARER as AuthenticationScheme,
+        };
+
+        jest.spyOn(PkceGenerator, "generatePkceCodes").mockResolvedValue({
+            challenge: TEST_CONFIG.TEST_CHALLENGE,
+            verifier: TEST_CONFIG.TEST_VERIFIER,
+        });
+
+        const authCodeRequest =
+            await testClient.initializeAuthorizationCodeRequest(request);
+        expect(authCodeRequest.popKid).toBeUndefined;
+    });
+
+    it("initializeAuthorizationCodeRequest validates the request and adds reqCnf param when user defined", async () => {
+        const request: AuthorizationUrlRequest = {
+            redirectUri: TEST_URIS.TEST_REDIR_URI,
+            scopes: ["scope"],
+            loginHint: "AbeLi@microsoft.com",
+            state: TEST_STATE_VALUES.USER_STATE,
+            authority: TEST_CONFIG.validAuthority,
+            correlationId: TEST_CONFIG.CORRELATION_ID,
+            responseMode: TEST_CONFIG.RESPONSE_MODE as ResponseMode,
+            nonce: "",
+            authenticationScheme:
+                TEST_CONFIG.TOKEN_TYPE_BEARER as AuthenticationScheme,
+            popKid: TEST_REQ_CNF_DATA.kid,
+        };
+
+        jest.spyOn(PkceGenerator, "generatePkceCodes").mockResolvedValue({
+            challenge: TEST_CONFIG.TEST_CHALLENGE,
+            verifier: TEST_CONFIG.TEST_VERIFIER,
+        });
+
+        const authCodeRequest =
+            await testClient.initializeAuthorizationCodeRequest(request);
+        expect(authCodeRequest.popKid).toEqual(TEST_REQ_CNF_DATA.kid);
     });
 
     it("getDiscoveredAuthority - request authority only", async () => {
-        const reqAuthority = TEST_CONFIG.validAuthority;
+        const requestAuthority = TEST_CONFIG.validAuthority;
 
-        const authority = await testClient.getDiscoveredAuthority(reqAuthority);
+        const authority = await testClient.getDiscoveredAuthority({
+            requestAuthority,
+        });
         expect(authority.canonicalAuthority).toBe(TEST_CONFIG.validAuthority);
     });
 
     it("getDiscoveredAuthority - azureCloudOptions set", async () => {
-        const reqAuthority = TEST_CONFIG.validAuthority;
-        const reqAzureCloudOptions: AzureCloudOptions = {
+        const requestAuthority = TEST_CONFIG.validAuthority;
+        const requestAzureCloudOptions: AzureCloudOptions = {
             azureCloudInstance: AzureCloudInstance.AzureUsGovernment,
             tenant: TEST_CONFIG.TENANT,
         };
 
-        const authority = await testClient.getDiscoveredAuthority(
-            reqAuthority,
-            reqAzureCloudOptions
-        );
+        const authority = await testClient.getDiscoveredAuthority({
+            requestAuthority,
+            requestAzureCloudOptions,
+        });
         expect(authority.canonicalAuthority).toBe(TEST_CONFIG.usGovAuthority);
     });
 
@@ -168,19 +218,18 @@ describe("StandardInteractionClient", () => {
         //Implementation of PCA was moved to controller.
         pca = (pca as any).controller;
 
-        const authority = await testClient.getDiscoveredAuthority();
+        const authority = await testClient.getDiscoveredAuthority({});
         expect(authority.canonicalAuthority).toBe(TEST_CONFIG.validAuthority);
     });
 
     it("getDiscoveredAuthority - Only azureCloudInstance provided ", async () => {
-        const reqAzureCloudOptions: AzureCloudOptions = {
+        const requestAzureCloudOptions: AzureCloudOptions = {
             azureCloudInstance: AzureCloudInstance.AzureGermany,
         };
 
-        const authority = await testClient.getDiscoveredAuthority(
-            undefined,
-            reqAzureCloudOptions
-        );
+        const authority = await testClient.getDiscoveredAuthority({
+            requestAzureCloudOptions,
+        });
         expect(authority.canonicalAuthority).toBe(TEST_CONFIG.germanyAuthority);
     });
 });
@@ -218,30 +267,28 @@ describe("StandardInteractionClient OIDCOptions Tests", () => {
             //@ts-ignore
             pca.performanceClient
         );
-        sinon
-            .stub(Authority.prototype, <any>"getEndpointMetadataFromNetwork")
-            .returns(DEFAULT_OPENID_CONFIG_RESPONSE.body);
-        sinon
-            .stub(FetchClient.prototype, "sendGetRequestAsync")
-            .callsFake((url) => {
-                if (
-                    url.startsWith(
-                        "https://login.microsoftonline.com/common/discovery/instance?"
-                    )
-                ) {
-                    return Promise.resolve(DEFAULT_TENANT_DISCOVERY_RESPONSE);
-                } else {
-                    return Promise.reject({
-                        headers: {},
-                        status: 404,
-                        body: {},
-                    });
-                }
-            });
-    });
-
-    afterEach(() => {
-        sinon.restore();
+        jest.spyOn(
+            Authority.prototype,
+            <any>"getEndpointMetadataFromNetwork"
+        ).mockReturnValue(DEFAULT_OPENID_CONFIG_RESPONSE.body);
+        jest.spyOn(
+            FetchClient.prototype,
+            "sendGetRequestAsync"
+        ).mockImplementation((url) => {
+            if (
+                url.startsWith(
+                    "https://login.microsoftonline.com/common/discovery/instance?"
+                )
+            ) {
+                return Promise.resolve(DEFAULT_TENANT_DISCOVERY_RESPONSE);
+            } else {
+                return Promise.reject({
+                    headers: {},
+                    status: 404,
+                    body: {},
+                });
+            }
+        });
     });
 
     it("initializeAuthorizationRequest calls for a query response when OIDCOptions.serverResponseType is set to query", async () => {

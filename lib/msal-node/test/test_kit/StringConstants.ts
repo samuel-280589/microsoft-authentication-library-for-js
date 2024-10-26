@@ -6,8 +6,6 @@
 import {
     AuthenticationResult,
     PasswordGrantConstants,
-} from "@azure/msal-common";
-import {
     AuthenticationScheme,
     Constants,
     ONE_DAY_IN_MS,
@@ -16,6 +14,7 @@ import {
     DEFAULT_AUTHORITY_FOR_MANAGED_IDENTITY,
     DEFAULT_MANAGED_IDENTITY_ID,
 } from "../../src/utils/Constants";
+import { ManagedIdentityTokenResponse } from "../../src/response/ManagedIdentityTokenResponse";
 
 // This file contains the string constants used by the test classes.
 
@@ -194,6 +193,7 @@ export const TEST_CONFIG = {
     DEFAULT_TOKEN_RENEWAL_OFFSET: 300,
     TEST_CONFIG_ASSERTION: "DefaultAssertion",
     TEST_REQUEST_ASSERTION: "RequestAssertion",
+    REDIRECT_URI: TEST_URIS.TEST_REDIRECT_URI_LOCALHOST,
 };
 
 const ADDITIONAL_CLAIM = '"additional_claim":{"key":"value"}';
@@ -218,6 +218,8 @@ export const TEST_POP_VALUES = {
     CLIENT_CLAIMS:
         '{"customClaim":"CustomClaimValue","anotherClaim":"AnotherValue"}',
     KID: "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs",
+    URLSAFE_ENCODED_REQCNF:
+        "eyJraWQiOiJOemJMc1hoOHVEQ2NkLTZNTndYRjRXXzdub1dYRlpBZkhreFpzUkdDOVhzIiwieG1zX2tzbCI6InN3In0",
     ENCODED_REQ_CNF:
         "eyJraWQiOiJOemJMc1hoOHVEQ2NkLTZNTndYRjRXXzdub1dYRlpBZkhreFpzUkdDOVhzIiwieG1zX2tzbCI6InN3In0=",
     DECODED_REQ_CNF:
@@ -376,8 +378,52 @@ export const MANAGED_IDENTITY_AZURE_ARC_WWW_AUTHENTICATE_HEADER: string = `Basic
 export const MANAGED_IDENTITY_CONTENT_TYPE_HEADER: string =
     "application/x-www-form-urlencoded;charset=utf-8";
 
-export const MANAGED_IDENTITY_TOKEN_RETRIEVAL_ERROR: string =
+export const MANAGED_IDENTITY_TOKEN_RETRIEVAL_ERROR_MESSAGE: string =
     "There was an error retrieving the access token from the managed identity.";
+export const MANAGED_IDENTITY_TOKEN_RETRIEVAL_ERROR = "fake_error";
+const MANAGED_IDENTITY_TOKEN_RETRIEVAL_ERROR_CORRELATION_ID =
+    "fake_correlation_id";
+
+// Any Managed Identity Source 500 error response
+export const MANAGED_IDENTITY_NETWORK_REQUEST_500_ERROR: ManagedIdentityTokenResponse =
+    {
+        message: MANAGED_IDENTITY_TOKEN_RETRIEVAL_ERROR_MESSAGE,
+        correlation_id: MANAGED_IDENTITY_TOKEN_RETRIEVAL_ERROR_CORRELATION_ID,
+    };
+
+// App Service 400 error response
+export const MANAGED_IDENTITY_APP_SERVICE_NETWORK_REQUEST_400_ERROR: ManagedIdentityTokenResponse =
+    {
+        ...MANAGED_IDENTITY_NETWORK_REQUEST_500_ERROR,
+    };
+// Cloud Shell 400 error response
+export const MANAGED_IDENTITY_CLOUD_SHELL_NETWORK_REQUEST_400_ERROR: ManagedIdentityTokenResponse =
+    {
+        error: {
+            code: MANAGED_IDENTITY_TOKEN_RETRIEVAL_ERROR,
+            message: MANAGED_IDENTITY_TOKEN_RETRIEVAL_ERROR_MESSAGE,
+        },
+    };
+// Azure Arc 400 error response
+export const MANAGED_IDENTITY_AZURE_ARC_NETWORK_REQUEST_400_ERROR: ManagedIdentityTokenResponse =
+    {
+        error: MANAGED_IDENTITY_TOKEN_RETRIEVAL_ERROR,
+        error_description: MANAGED_IDENTITY_TOKEN_RETRIEVAL_ERROR_MESSAGE,
+        error_codes: ["fake_error_code"],
+        timestamp: "fake_timestamp",
+        trace_id: "fake_trace_id",
+        correlation_id: MANAGED_IDENTITY_TOKEN_RETRIEVAL_ERROR_CORRELATION_ID,
+    };
+// Imds 400 error response
+export const MANAGED_IDENTITY_IMDS_NETWORK_REQUEST_400_ERROR: ManagedIdentityTokenResponse =
+    {
+        ...MANAGED_IDENTITY_AZURE_ARC_NETWORK_REQUEST_400_ERROR,
+    };
+// Service Fabric 400 error response
+export const MANAGED_IDENTITY_SERVICE_FABRIC_NETWORK_REQUEST_400_ERROR: ManagedIdentityTokenResponse =
+    {
+        ...MANAGED_IDENTITY_AZURE_ARC_NETWORK_REQUEST_400_ERROR,
+    };
 
 export const MANAGED_IDENTITY_RESOURCE_BASE: string =
     "https://graph.microsoft.com";

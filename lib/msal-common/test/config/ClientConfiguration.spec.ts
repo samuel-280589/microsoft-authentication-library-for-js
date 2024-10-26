@@ -48,12 +48,6 @@ describe("ClientConfiguration.ts Class Unit Tests", () => {
         ).toThrowError(AuthError);
         // Storage interface checks
         expect(emptyConfig.storageInterface).not.toBeNull();
-        expect(emptyConfig.storageInterface.clear).not.toBeNull();
-        await expect(
-            emptyConfig.storageInterface.clear()
-        ).rejects.toMatchObject(
-            createClientAuthError(ClientAuthErrorCodes.methodNotImplemented)
-        );
         expect(emptyConfig.storageInterface.getAccount).not.toBeNull();
         expect(() =>
             emptyConfig.storageInterface.getAccount("testKey")
@@ -152,6 +146,22 @@ describe("ClientConfiguration.ts Class Unit Tests", () => {
                 base64Encode: (input: string): string => {
                     return "testEncodedString";
                 },
+                base64UrlEncode(input: string): string {
+                    switch (input) {
+                        case '{"kid": "XnsuAvttTPp0nn1K_YMLePLDbp7syCKhNHt7HjYHJYc"}':
+                            return "eyJraWQiOiAiWG5zdUF2dHRUUHAwbm4xS19ZTUxlUExEYnA3c3lDS2hOSHQ3SGpZSEpZYyJ9";
+                        default:
+                            return input;
+                    }
+                },
+                encodeKid(input: string): string {
+                    switch (input) {
+                        case "XnsuAvttTPp0nn1K_YMLePLDbp7syCKhNHt7HjYHJYc":
+                            return "eyJraWQiOiAiWG5zdUF2dHRUUHAwbm4xS19ZTUxlUExEYnA3c3lDS2hOSHQ3SGpZSEpZYyJ9";
+                        default:
+                            return input;
+                    }
+                },
                 async getPublicKeyThumbprint(): Promise<string> {
                     return TEST_POP_VALUES.KID;
                 },
@@ -224,8 +234,6 @@ describe("ClientConfiguration.ts Class Unit Tests", () => {
         ).resolves.toBe(true);
         // Storage interface tests
         expect(newConfig.storageInterface).not.toBeNull();
-        expect(newConfig.storageInterface.clear).not.toBeNull();
-        expect(newConfig.storageInterface.clear).toBe(cacheStorageMock.clear);
         expect(newConfig.storageInterface.getAccount).not.toBeNull();
         expect(
             newConfig.storageInterface.getAccount(

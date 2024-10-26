@@ -227,6 +227,14 @@ export const mockCrypto = {
     base64Encode(input: string): string {
         return Buffer.from(input, "utf-8").toString("base64");
     },
+    base64UrlEncode(input: string): string {
+        return Buffer.from(input, "utf-8").toString("base64url");
+    },
+    encodeKid(input: string): string {
+        return Buffer.from(JSON.stringify({ kid: input }), "utf-8").toString(
+            "base64url"
+        );
+    },
     async getPublicKeyThumbprint(): Promise<string> {
         return TEST_POP_VALUES.KID;
     },
@@ -317,6 +325,7 @@ export class ClientTestUtils {
             authOptions: {
                 clientId: TEST_CONFIG.MSAL_CLIENT_ID,
                 authority: authority,
+                redirectUri: "https://localhost",
             },
             storageInterface: mockStorage,
             networkInterface: mockHttpClient,

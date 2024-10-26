@@ -1,8 +1,81 @@
 # Change Log - @azure/msal-angular
 
-This log was last generated on Mon, 06 May 2024 23:48:17 GMT and should not be manually modified.
+This log was last generated on Thu, 03 Oct 2024 00:40:42 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 3.0.25
+
+Thu, 03 Oct 2024 00:40:42 GMT
+
+### Patches
+
+- Bump @azure/msal-browser to v3.25.0
+- Bump eslint-config-msal to v0.0.0
+
+## 3.0.24
+
+Thu, 19 Sep 2024 23:48:30 GMT
+
+### Patches
+
+- Bump @azure/msal-browser to v3.24.0
+- Bump eslint-config-msal to v0.0.0
+
+## 3.0.23
+
+Tue, 23 Jul 2024 14:19:34 GMT
+
+### Patches
+
+- Bump @azure/msal-browser to v3.20.0
+- Bump eslint-config-msal to v0.0.0
+
+## 3.0.22
+
+Tue, 16 Jul 2024 18:22:27 GMT
+
+### Patches
+
+- Bump @azure/msal-browser to v3.19.1
+- Bump eslint-config-msal to v0.0.0
+
+## 3.0.21
+
+Mon, 01 Jul 2024 19:18:29 GMT
+
+### Patches
+
+- Bump @azure/msal-browser to v3.18.0
+- Bump eslint-config-msal to v0.0.0
+
+## 3.0.20
+
+Mon, 10 Jun 2024 22:30:36 GMT
+
+### Patches
+
+- Bump @azure/msal-browser to v3.17.0
+- Bump eslint-config-msal to v0.0.0
+
+## 3.0.19
+
+Tue, 04 Jun 2024 00:08:57 GMT
+
+### Patches
+
+- Fix query string instead of HostNameAndPort bug in MsalInterceptor #7137 (joarroyo@microsoft.com)
+- Bump @azure/msal-browser to v3.16.0
+- Bump eslint-config-msal to v0.0.0
+
+## 3.0.18
+
+Tue, 28 May 2024 21:37:23 GMT
+
+### Patches
+
+- Bump @azure/msal-browser to v3.15.0
+- Bump eslint-config-msal to v0.0.0
 
 ## 3.0.17
 

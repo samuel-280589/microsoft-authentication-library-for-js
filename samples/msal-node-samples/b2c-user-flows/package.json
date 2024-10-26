@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "start": "node ./index.js",
-    "test": "jest",
+    "test:e2e": "jest",
     "build:package": "cd ../../../lib/msal-common && npm run build && cd ../msal-node && npm run build",
     "start:build": "npm run build:package && npm start"
   },
@@ -14,8 +14,8 @@
   "license": "MIT",
   "dependencies": {
     "@azure/msal-node": "^2.1.0",
-    "axios": "^1.6.0",
-    "express": "^4.19.2",
+    "axios": "^1.7.4",
+    "express": "^4.20.0",
     "express-handlebars": "^5.3.5",
     "express-session": "^1.17.2"
   },

@@ -1,8 +1,139 @@
 # Change Log - @azure/msal-node
 
-This log was last generated on Mon, 06 May 2024 23:48:17 GMT and should not be manually modified.
+This log was last generated on Thu, 03 Oct 2024 00:40:42 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 2.15.0
+
+Thu, 03 Oct 2024 00:40:42 GMT
+
+### Minor changes
+
+- Implemented functionality to skip the cache for MI when claims are provided #7207 (rginsburg@microsoft.com)
+- Bump eslint-config-msal to v0.0.0
+- Bump rollup-msal to v0.0.0
+
+### Patches
+
+- Allow POP Params for brokered requests (thomas.norling@microsoft.com)
+
+## 2.14.0
+
+Thu, 19 Sep 2024 23:48:30 GMT
+
+### Minor changes
+
+- Fix type resolution when using moduleResolution node16 (thomas.norling@microsoft.com)
+- Bump @azure/msal-common to v14.15.0
+- Bump eslint-config-msal to v0.0.0
+- Bump rollup-msal to v0.0.0
+
+## 2.13.1
+
+Wed, 28 Aug 2024 23:06:01 GMT
+
+### Patches
+
+- Use '127.0.0.1' for the host when spinning up local loopback server (tyleonha@microsoft.com)
+- Bump @azure/msal-common to v14.14.2
+- Bump eslint-config-msal to v0.0.0
+
+## 2.13.0
+
+Tue, 13 Aug 2024 23:25:05 GMT
+
+### Minor changes
+
+- Added file-based detection for Azure Arc (rginsburg@microsoft.com)
+- Bump @azure/msal-common to v14.14.1
+- Bump eslint-config-msal to v0.0.0
+
+### Patches
+
+- Send the error template back when there's an error response (tyleonha@microsoft.com)
+- clientSecret can now (once again) be provided as undefined #7209 (rginsburg@microsoft.com)
+
+## 2.12.0
+
+Tue, 23 Jul 2024 14:19:34 GMT
+
+### Minor changes
+
+- Track MSAL node SKU for broker flows #7213 (kshabelko@microsoft.com)
+- Bump @azure/msal-common to v14.14.0
+- Bump eslint-config-msal to v0.0.0
+
+## 2.11.1
+
+Tue, 16 Jul 2024 18:22:27 GMT
+
+### Patches
+
+- SHA-256 thumbprints now use PSS padding #7200 (rginsburg@microsoft.com)
+- Bump @azure/msal-common to v14.13.1
+- Bump eslint-config-msal to v0.0.0
+
+## 2.11.0
+
+Fri, 12 Jul 2024 19:56:47 GMT
+
+### Minor changes
+
+- Deprecated SHA-1 thumbprint for clientCertificate #7185 (rginsburg@microsoft.com)
+- Bump eslint-config-msal to v0.0.0
+
+## 2.10.0
+
+Mon, 01 Jul 2024 19:18:29 GMT
+
+### Minor changes
+
+- Add main field to package.json (thomas.norling@microsoft.com)
+- Bump @azure/msal-common to v14.13.0
+- Bump eslint-config-msal to v0.0.0
+
+### Patches
+
+- Reformatted ManagedIdentityTokenResponse + adjusted unit tests #7167 (rginsburg@microsoft.com)
+
+## 2.9.2
+
+Mon, 10 Jun 2024 22:30:36 GMT
+
+### Patches
+
+- Fixed msal-node unit tests for PoP token support #7119 (lalimasharda@microsoft.com)
+- Implementation Based on Feature Request #7151 (rginsburg@microsoft.com)
+- Bump @azure/msal-common to v14.12.0
+- Bump eslint-config-msal to v0.0.0
+
+## 2.9.1
+
+Tue, 04 Jun 2024 00:08:57 GMT
+
+### Patches
+
+- Bump @azure/msal-common to v14.11.0
+- Bump eslint-config-msal to v0.0.0
+
+## 2.9.0
+
+Tue, 28 May 2024 21:37:23 GMT
+
+### Minor changes
+
+- Added API for Managed Identity to detect the current environment #7093 (rginsburg@microsoft.com)
+- Bump eslint-config-msal to v0.0.0
+
+## 2.8.1
+
+Mon, 13 May 2024 18:03:26 GMT
+
+### Patches
+
+- Fixed bug where dev-provided certificate was not being attached to client assertion #7088 (rginsburg@microsoft.com)
+- Bump eslint-config-msal to v0.0.0
 
 ## 2.8.0
 

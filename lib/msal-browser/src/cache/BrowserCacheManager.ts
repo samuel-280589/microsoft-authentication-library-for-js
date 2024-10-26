@@ -39,31 +39,31 @@ import {
     CacheHelpers,
     StoreInCache,
     CacheError,
-} from "@azure/msal-common";
-import { CacheOptions } from "../config/Configuration";
+} from "@azure/msal-common/browser";
+import { CacheOptions } from "../config/Configuration.js";
 import {
     createBrowserAuthError,
     BrowserAuthErrorCodes,
-} from "../error/BrowserAuthError";
+} from "../error/BrowserAuthError.js";
 import {
     BrowserCacheLocation,
     InteractionType,
     TemporaryCacheKeys,
     InMemoryCacheKeys,
     StaticCacheKeys,
-} from "../utils/BrowserConstants";
-import { BrowserStorage } from "./BrowserStorage";
-import { MemoryStorage } from "./MemoryStorage";
-import { IWindowStorage } from "./IWindowStorage";
-import { extractBrowserRequestState } from "../utils/BrowserProtocolUtils";
-import { NativeTokenRequest } from "../broker/nativeBroker/NativeRequest";
-import { AuthenticationResult } from "../response/AuthenticationResult";
-import { SilentRequest } from "../request/SilentRequest";
-import { SsoSilentRequest } from "../request/SsoSilentRequest";
-import { RedirectRequest } from "../request/RedirectRequest";
-import { PopupRequest } from "../request/PopupRequest";
-import { base64Decode } from "../encode/Base64Decode";
-import { base64Encode } from "../encode/Base64Encode";
+} from "../utils/BrowserConstants.js";
+import { BrowserStorage } from "./BrowserStorage.js";
+import { MemoryStorage } from "./MemoryStorage.js";
+import { IWindowStorage } from "./IWindowStorage.js";
+import { extractBrowserRequestState } from "../utils/BrowserProtocolUtils.js";
+import { NativeTokenRequest } from "../broker/nativeBroker/NativeRequest.js";
+import { AuthenticationResult } from "../response/AuthenticationResult.js";
+import { SilentRequest } from "../request/SilentRequest.js";
+import { SsoSilentRequest } from "../request/SsoSilentRequest.js";
+import { RedirectRequest } from "../request/RedirectRequest.js";
+import { PopupRequest } from "../request/PopupRequest.js";
+import { base64Decode } from "../encode/Base64Decode.js";
+import { base64Encode } from "../encode/Base64Encode.js";
 
 /**
  * This class implements the cache storage interface for MSAL through browser local or session storage.
@@ -1266,13 +1266,16 @@ export class BrowserCacheManager extends CacheManager {
     /**
      * Clears all access tokes that have claims prior to saving the current one
      * @param performanceClient {IPerformanceClient}
+     * @param correlationId {string} correlation id
      * @returns
      */
     async clearTokensAndKeysWithClaims(
-        performanceClient: IPerformanceClient
+        performanceClient: IPerformanceClient,
+        correlationId: string
     ): Promise<void> {
         performanceClient.addQueueMeasurement(
-            PerformanceEvents.ClearTokensAndKeysWithClaims
+            PerformanceEvents.ClearTokensAndKeysWithClaims,
+            correlationId
         );
 
         const tokenKeys = this.getTokenKeys();
@@ -1837,6 +1840,15 @@ export class BrowserCacheManager extends CacheManager {
         if (request.claims) {
             claimsHash = await this.cryptoImpl.hashString(request.claims);
         }
+
+        /**
+         * meta data for cache stores time in seconds from epoch
+         * AuthenticationResult returns expiresOn and extExpiresOn in milliseconds (as a Date object which is in ms)
+         * We need to map these for the cache when building tokens from AuthenticationResult
+         *
+         * The next MSAL VFuture should map these both to same value if possible
+         */
+
         const accessTokenEntity = CacheHelpers.createAccessTokenEntity(
             result.account?.homeAccountId,
             result.account.environment,
@@ -1844,8 +1856,8 @@ export class BrowserCacheManager extends CacheManager {
             this.clientId,
             result.tenantId,
             result.scopes.join(" "),
-            result.expiresOn?.getTime() || 0,
-            result.extExpiresOn?.getTime() || 0,
+            result.expiresOn ? result.expiresOn.getTime() / 1000 : 0,
+            result.extExpiresOn ? result.extExpiresOn.getTime() / 1000 : 0,
             base64Decode,
             undefined, // refreshOn
             result.tokenType as AuthenticationScheme,
@@ -1855,11 +1867,10 @@ export class BrowserCacheManager extends CacheManager {
             claimsHash
         );
 
-        const cacheRecord = new CacheRecord(
-            undefined,
-            idTokenEntity,
-            accessTokenEntity
-        );
+        const cacheRecord = {
+            idToken: idTokenEntity,
+            accessToken: accessTokenEntity,
+        };
         return this.saveCacheRecord(cacheRecord);
     }
 

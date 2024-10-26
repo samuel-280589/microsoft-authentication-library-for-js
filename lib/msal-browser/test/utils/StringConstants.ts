@@ -170,6 +170,11 @@ export const TEST_POP_VALUES = {
         '{"kid":"NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs","xms_ksl":"sw"}',
 };
 
+export const TEST_REQ_CNF_DATA = {
+    kid: TEST_POP_VALUES.KID,
+    reqCnfString: TEST_POP_VALUES.DECODED_REQ_CNF,
+};
+
 export const TEST_SSH_VALUES = {
     SSH_JWK:
         '{"kty":"RSA","n":"wDJwv083ZhGGkpMPVcBMwtSBNLu7qhT2VmKv7AyPEz_dWb8GQzNEnWT1niNjFI0isDMFWQ7X2O-dhTL9J1QguQ==","e":"AQAB"}',
@@ -432,3 +437,8 @@ export const testNavUrlNoRequest = `https://login.microsoftonline.com/common/oau
 export const testLogoutUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/logout?post_logout_redirect_uri=${encodeURIComponent(
     `${TEST_URIS.TEST_REDIR_URI}`
 )}`;
+
+export function calculateExpiresDate(expiresIn: number): Date {
+    const totalExpiresInSeconds = Math.round(Date.now() / 1000 + expiresIn);
+    return new Date(totalExpiresInSeconds * 1000);
+}

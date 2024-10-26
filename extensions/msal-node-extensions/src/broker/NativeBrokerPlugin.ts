@@ -4,6 +4,7 @@
  */
 
 import {
+    AADServerParamKeys,
     AccountInfo,
     AuthenticationResult,
     AuthenticationScheme,
@@ -21,7 +22,8 @@ import {
     NativeSignOutRequest,
     PromptValue,
     ServerError,
-} from "@azure/msal-common";
+    ServerTelemetryManager,
+} from "@azure/msal-common/node";
 import {
     msalNodeRuntime,
     Account,
@@ -34,9 +36,9 @@ import {
     SignOutResult,
     LogLevel as MsalRuntimeLogLevel,
 } from "@azure/msal-node-runtime";
-import { ErrorCodes } from "../utils/Constants";
-import { NativeAuthError } from "../error/NativeAuthError";
-import { version, name } from "../packageMetadata";
+import { ErrorCodes } from "../utils/Constants.js";
+import { NativeAuthError } from "../error/NativeAuthError.js";
+import { version, name } from "../packageMetadata.js";
 
 export class NativeBrokerPlugin implements INativeBrokerPlugin {
     private logger: Logger;
@@ -464,11 +466,10 @@ export class NativeBrokerPlugin implements INativeBrokerPlugin {
             if (request.authenticationScheme === AuthenticationScheme.POP) {
                 if (
                     !request.resourceRequestMethod ||
-                    !request.resourceRequestUri ||
-                    !request.shrNonce
+                    !request.resourceRequestUri
                 ) {
                     throw new Error(
-                        "Authentication Scheme set to POP but one or more of the following parameters are missing: resourceRequestMethod, resourceRequestUri, shrNonce"
+                        "Authentication Scheme set to POP but one or more of the following parameters are missing: resourceRequestMethod, resourceRequestUri"
                     );
                 }
                 const resourceUrl = new URL(request.resourceRequestUri);
@@ -476,7 +477,7 @@ export class NativeBrokerPlugin implements INativeBrokerPlugin {
                     request.resourceRequestMethod,
                     resourceUrl.host,
                     resourceUrl.pathname,
-                    request.shrNonce
+                    request.shrNonce || ""
                 );
             }
 
@@ -487,6 +488,23 @@ export class NativeBrokerPlugin implements INativeBrokerPlugin {
                     }
                 );
             }
+
+            const skus =
+                request.extraParameters &&
+                request.extraParameters[AADServerParamKeys.X_CLIENT_EXTRA_SKU]
+                    ?.length
+                    ? request.extraParameters[
+                          AADServerParamKeys.X_CLIENT_EXTRA_SKU
+                      ]
+                    : "";
+            authParams.SetAdditionalParameter(
+                AADServerParamKeys.X_CLIENT_EXTRA_SKU,
+                ServerTelemetryManager.makeExtraSkuString({
+                    skus,
+                    extensionName: "msal.node.ext",
+                    extensionVersion: version,
+                })
+            );
         } catch (e) {
             const wrappedError = this.wrapError(e);
             if (wrappedError) {
@@ -529,6 +547,17 @@ export class NativeBrokerPlugin implements INativeBrokerPlugin {
             idTokenClaims
         );
 
+        let accessToken;
+        let tokenType;
+        if (authResult.isPopAuthorization) {
+            // Header includes 'pop ' prefix
+            accessToken = authResult.authorizationHeader.split(" ")[1];
+            tokenType = AuthenticationScheme.POP;
+        } else {
+            accessToken = authResult.accessToken;
+            tokenType = AuthenticationScheme.BEARER;
+        }
+
         const result: AuthenticationResult = {
             authority: request.authority,
             uniqueId: idTokenClaims.oid || idTokenClaims.sub || "",
@@ -537,12 +566,10 @@ export class NativeBrokerPlugin implements INativeBrokerPlugin {
             account: accountInfo,
             idToken: authResult.rawIdToken,
             idTokenClaims: idTokenClaims,
-            accessToken: authResult.accessToken,
+            accessToken: accessToken,
             fromCache: fromCache,
             expiresOn: new Date(authResult.expiresOn),
-            tokenType: authResult.isPopAuthorization
-                ? AuthenticationScheme.POP
-                : AuthenticationScheme.BEARER,
+            tokenType: tokenType,
             correlationId: request.correlationId,
             fromNativeBroker: true,
         };

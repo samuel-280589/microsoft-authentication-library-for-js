@@ -12,15 +12,19 @@ import {
     ShrOptions,
     SignedHttpRequest,
     SignedHttpRequestParameters,
-} from "@azure/msal-common";
-import { base64Encode, urlEncode, urlEncodeArr } from "../encode/Base64Encode";
-import { base64Decode } from "../encode/Base64Decode";
-import * as BrowserCrypto from "./BrowserCrypto";
+} from "@azure/msal-common/browser";
+import {
+    base64Encode,
+    urlEncode,
+    urlEncodeArr,
+} from "../encode/Base64Encode.js";
+import { base64Decode } from "../encode/Base64Decode.js";
+import * as BrowserCrypto from "./BrowserCrypto.js";
 import {
     createBrowserAuthError,
     BrowserAuthErrorCodes,
-} from "../error/BrowserAuthError";
-import { AsyncMemoryStorage } from "../cache/AsyncMemoryStorage";
+} from "../error/BrowserAuthError.js";
+import { AsyncMemoryStorage } from "../cache/AsyncMemoryStorage.js";
 
 export type CachedKeyPair = {
     publicKey: CryptoKey;
@@ -76,6 +80,23 @@ export class CryptoOps implements ICrypto {
      */
     base64Decode(input: string): string {
         return base64Decode(input);
+    }
+
+    /**
+     * Encodes input string to base64 URL safe string.
+     * @param input
+     */
+    base64UrlEncode(input: string): string {
+        return urlEncode(input);
+    }
+
+    /**
+     * Stringifies and base64Url encodes input public key
+     * @param inputKid
+     * @returns Base64Url encoded public key
+     */
+    encodeKid(inputKid: string): string {
+        return this.base64UrlEncode(JSON.stringify({ kid: inputKid }));
     }
 
     /**

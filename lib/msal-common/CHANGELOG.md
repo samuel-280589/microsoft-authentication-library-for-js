@@ -1,8 +1,98 @@
 # Change Log - @azure/msal-common
 
-This log was last generated on Mon, 06 May 2024 23:48:17 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Sep 2024 23:48:30 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 14.15.0
+
+Thu, 19 Sep 2024 23:48:30 GMT
+
+### Minor changes
+
+- Fix type resolution when using moduleResolution node16 (thomas.norling@microsoft.com)
+- Add optional "instanceAware" config auth param #7259 (kshabelko@microsoft.com)
+- Bump eslint-config-msal to v0.0.0
+- Bump msal-test-utils to v0.0.1
+- Bump rollup-msal to v0.0.0
+
+## 14.14.2
+
+Wed, 28 Aug 2024 23:06:01 GMT
+
+### Patches
+
+- Remove PerformanceEvent for PopupTokenHelper #7270 (joarroyo@microsoft.com)
+- Bump eslint-config-msal to v0.0.0
+- Bump msal-test-utils to v0.0.1
+
+## 14.14.1
+
+Tue, 13 Aug 2024 23:25:08 GMT
+
+### Patches
+
+- Add retryError to PerformanceEvent #7216 (joarroyo@microsoft.com)
+- Add PerformanceEvent for PopupTokenHelper #7216 (joarroyo@microsoft.com)
+- Bump eslint-config-msal to v0.0.0
+- Bump msal-test-utils to v0.0.1
+
+## 14.14.0
+
+Tue, 23 Jul 2024 14:19:34 GMT
+
+### Minor changes
+
+- Track MSAL SKU for broker flows #7182 (kshabelko@microsoft.com)
+- Track MSAL node SKU for broker flows #7213 (kshabelko@microsoft.com)
+- Bump eslint-config-msal to v0.0.0
+- Bump msal-test-utils to v0.0.1
+
+## 14.13.1
+
+Tue, 16 Jul 2024 18:22:27 GMT
+
+### Patches
+
+- Generate tenantProfile even without idTokenClaims (thomas.norling@microsoft.com)
+- Bump eslint-config-msal to v0.0.0
+- Bump msal-test-utils to v0.0.1
+
+## 14.13.0
+
+Mon, 01 Jul 2024 19:18:29 GMT
+
+### Minor changes
+
+- Add main field to package.json (thomas.norling@microsoft.com)
+- Bump eslint-config-msal to v0.0.0
+- Bump msal-test-utils to v0.0.1
+
+### Patches
+
+- Reformatted ManagedIdentityTokenResponse + adjusted unit tests #7167 (rginsburg@microsoft.com)
+- Fix extraQueryParameters being dropped from request (thomas.norling@microsoft.com)
+- Make idTokenClaims optional when creating AccountEntity (thomas.norling@microsoft.com)
+
+## 14.12.0
+
+Mon, 10 Jun 2024 22:30:36 GMT
+
+### Minor changes
+
+- Add support for apps to set their own `reqCnf` and correct native flows cnf format #6357 (sameera.gajjarapu@microsoft.com)
+- Bump eslint-config-msal to v0.0.0
+- Bump msal-test-utils to v0.0.1
+
+## 14.11.0
+
+Tue, 04 Jun 2024 00:08:57 GMT
+
+### Minor changes
+
+- Instrument pre-redirect flow #7134 (kshabelko@microsoft.com)
+- Bump eslint-config-msal to v0.0.0
+- Bump msal-test-utils to v0.0.1
 
 ## 14.10.0
 
